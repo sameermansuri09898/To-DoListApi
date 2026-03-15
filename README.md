@@ -1,0 +1,2 @@
+Student Registratin Functioality
+Login Logout Functionality
