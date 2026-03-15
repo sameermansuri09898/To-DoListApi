@@ -1,6 +1,7 @@
 from .models import BaseRegistration
 from rest_framework import serializers
 
+
 class Studentlistserializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)
 
@@ -24,8 +25,25 @@ class Studentlistserializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Email is Already Exits")
         return value
     
+    def validate_username(self,value):
+        if BaseRegistration.objects.filter(username=value).exists():
+            raise serializers.ValidationError("This Username is Already Exits")
+        return value
+
+    
     def create(self, validated_data):
         validated_data.pop('confirm_password')
         validated_data['username'] = validated_data['email'] 
         user = BaseRegistration.objects.create_user(**validated_data)
         return user
+
+
+class Loginserializer(serializers.ModelSerializer):
+    username=serializers.CharField()
+    password=serializers.CharField()
+
+    class Meta:
+     model=BaseRegistration
+     fields=['username','password']
+
+
