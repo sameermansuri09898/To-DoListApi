@@ -1,4 +1,4 @@
-from .models import BaseRegistration
+from .models import BaseRegistration,todolist
 from rest_framework import serializers
 
 
@@ -46,4 +46,34 @@ class Loginserializer(serializers.ModelSerializer):
      model=BaseRegistration
      fields=['username','password']
 
+
+class PasswordCheange(serializers.ModelSerializer):
+    
+    password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = BaseRegistration
+        fields = ['password', 'confirm_password']
+
+    def validate(self, attrs):
+        password = attrs.get('password')
+        pass2 = attrs.get('confirm_password')
+
+        if password != pass2:
+            raise serializers.ValidationError("Password not matched")
+
+        return attrs
+
+    def save(self, **kwargs):
+        user = self.context.get('user')
+        password = self.validated_data.get('password')
+
+        user.set_password(password)
+        user.save()   
+
+class Todolist(serializers.Serializer):
+    model=todolist
+    fields='__all__'
+    read_only_fields = ['user']
 

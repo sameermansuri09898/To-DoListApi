@@ -13,3 +13,12 @@ class BaseRegistration(AbstractUser):
   def __str__(self):
         return self.email
 
+class todolist(models.Model):
+    user = models.ForeignKey(BaseRegistration, on_delete=models.CASCADE)
+    items_name=models.CharField(max_length=100)
+    Category=models.CharField(max_length=30)
+    updated_now=models.DateField(auto_now_add=True)
+    created_now=models.DateField(auto_now=True)
+
+    def __str__(self):
+        return super().__str__()
