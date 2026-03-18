@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+body {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+}
+.card {
+    border-radius: 15px;
+}
+.error-text {
+    color: red;
+    font-size: 13px;
+}
+</style>
+</head>
+
+<body class="d-flex align-items-center justify-content-center vh-100">
+
+<div class="container">
+<div class="row justify-content-center">
+<div class="col-md-6">
+
+<div class="card shadow-lg p-4">
+<h3 class="text-center mb-4">Create Account</h3>
+
+<form id="registerForm" novalidate>
+
+<!-- Username -->
+<div class="mb-3">
+    <input type="text" class="form-control" name="username" placeholder="Username">
+    <div class="error-text" id="error-username"></div>
+</div>
+
+<!-- Email -->
+<div class="mb-3">
+    <input type="email" class="form-control" name="email" placeholder="Email">
+    <div class="error-text" id="error-email"></div>
+</div>
+
+<!-- First Name -->
+<div class="mb-3">
+    <input type="text" class="form-control" name="first_name" placeholder="First Name">
+    <div class="error-text" id="error-first_name"></div>
+</div>
+
+<!-- Last Name -->
+<div class="mb-3">
+    <input type="text" class="form-control" name="last_name" placeholder="Last Name">
+    <div class="error-text" id="error-last_name"></div>
+</div>
+
+<!-- Address -->
+<div class="mb-3">
+    <textarea class="form-control" name="Address" placeholder="Address"></textarea>
+    <div class="error-text" id="error-Address"></div>
+</div>
+
+<!-- Gender -->
+<div class="mb-3">
+    <select class="form-control" name="gender">
+        <option value="">Select Gender</option>
+        <option value="M">Male</option>
+        <option value="F">Female</option>
+    </select>
+    <div class="error-text" id="error-gender"></div>
+</div>
+
+<!-- Password -->
+<div class="mb-3">
+    <input type="password" class="form-control" name="password" placeholder="Password">
+    <div class="error-text" id="error-password"></div>
+</div>
+
+<!-- Confirm Password -->
+<div class="mb-3">
+    <input type="password" class="form-control" name="confirm_password" placeholder="Confirm Password">
+    <div class="error-text" id="error-confirm_password"></div>
+</div>
+
+<button class="btn btn-primary w-100">Register</button>
+
+</form>
+</div>
+
+</div>
+</div>
+</div>
+
+<script>
+const form = document.getElementById("registerForm");
+
+form.addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    // Clear old errors
+    document.querySelectorAll(".error-text").forEach(el => el.innerText = "");
+    document.querySelectorAll(".form-control").forEach(el => el.classList.remove("is-invalid"));
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    // Frontend validation
+    let hasError = false;
+
+    if (data.password !== data.confirm_password) {
+        showError("confirm_password", "Passwords do not match");
+        hasError = true;
+    }
+
+    if (hasError) return;
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/Account/Registration/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert("✅ Registration Successful");
+            form.reset();
+        } else {
+            handleErrors(result);
+        }
+
+    } catch (error) {
+        alert("Server error");
+    }
+});
+
+// Show error under field
+function showError(field, message) {
+    const input = document.querySelector(`[name="${field}"]`);
+    const errorDiv = document.getElementById(`error-${field}`);
+
+    if (input) input.classList.add("is-invalid");
+    if (errorDiv) errorDiv.innerText = message;
+}
+
+// Handle DRF errors
+function handleErrors(errors) {
+    for (let field in errors) {
+        showError(field, errors[field][0]);
+    }
+}
+</script>
+
+</body>
+</html>

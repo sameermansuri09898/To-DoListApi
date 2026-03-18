@@ -47,30 +47,37 @@ class Loginserializer(serializers.ModelSerializer):
      fields=['username','password']
 
 
-class PasswordCheange(serializers.ModelSerializer):
-    
-    password = serializers.CharField(write_only=True)
+class PasswordChangeSerializer(serializers.Serializer):
+
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
 
-    class Meta:
-        model = BaseRegistration
-        fields = ['password', 'confirm_password']
-
     def validate(self, attrs):
-        password = attrs.get('password')
-        pass2 = attrs.get('confirm_password')
+        user = self.context['request'].user
 
-        if password != pass2:
-            raise serializers.ValidationError("Password not matched")
+        # old password check
+        if not user.check_password(attrs['old_password']):
+            raise serializers.ValidationError({
+                "old_password": ["Old password is incorrect"]
+            })
+
+        # password match
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({
+                "confirm_password": ["Passwords do not match"]
+            })
 
         return attrs
 
     def save(self, **kwargs):
-        user = self.context.get('user')
-        password = self.validated_data.get('password')
+        user = self.context['request'].user
+        password = self.validated_data['new_password']
 
         user.set_password(password)
-        user.save()   
+        user.save()
+
+        return user
 
 class Todolist(serializers.Serializer):
     model=todolist

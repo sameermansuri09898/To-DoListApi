@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny,IsAuthenticated
-from .studentserializer import Studentlistserializer,Loginserializer,PasswordCheange,Todolist
+from .studentserializer import Studentlistserializer,Loginserializer,PasswordChangeSerializer,Todolist
 from django.contrib.auth import authenticate,logout
 from rest_framework.authtoken.models import Token
 from rest_framework import viewsets
@@ -57,14 +57,20 @@ class LogoutUser(APIView):
         })
 
 class Changepasswordclass(APIView):
-    permission_classes =[IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
-    def post(self,request,formate=None):
-        serializer=PasswordCheange(data=request.data,context={"user":request.data})
+    def post(self, request):
+        serializer = PasswordChangeSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+
         serializer.is_valid(raise_exception=True)
+        serializer.save()
+
         return Response({
-            "mssg":"password Change Successfully"
-        })    
+            "message": "Password updated successfully"
+        }) 
 
 
 class TodoClass(viewsets.ViewSet):
